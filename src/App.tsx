@@ -22,6 +22,30 @@ type DishName =
   | 'glass'
   | 'wine glass';
 
+const art: { [key in DishName]: string } = {
+  pan: `
+ __      ___,.-------..__         __
+//\\\\ _,-''                \`'--._ //\\\\
+\\\\ ;'                           \`: //
+  \`(                             )'
+    :.                           ,;
+    \`.\`--.___           ___.--','
+      \`.     \`\`-------''     ,'
+          -.               ,-
+            \`-._______.-'`,
+  spoon: `
+ ________   .==.
+[________>c((_  )
+            '=='`,
+  knife: `
+ ________ ___,,,,,,,
+[________>__________\\`,
+  fork: `
+ ________  .====
+[________>< :===
+           '====`,
+};
+
 type Dish = { type: DishName; id: string };
 
 function createDish(): Dish {
@@ -50,11 +74,21 @@ function useInterval(callback: Function, delay: number) {
   }, [delay]);
 }
 
+function DishDrawing({ dish: { type } }: { dish: Dish }) {
+  return (
+    <>
+      <pre>{art[type]}</pre> {type}
+    </>
+  );
+}
+
 const WASH_TIME = 5000;
 
 export default function App() {
   const [error, setError] = useState<string | undefined>();
-  const [dishes, setDishes] = useState<Dish[]>([createDish()]);
+  const [dishes, setDishes] = useState<Dish[]>(
+    Array.from({ length: 10 }, () => createDish())
+  );
   const [hand, setHand] = useState<Dish | undefined>();
   const [sink, setSink] = useState<Dish | undefined>();
   const [canDry, setCanDry] = useState<boolean>(false);
@@ -130,19 +164,20 @@ export default function App() {
         <ul>
           {dishes.map((dish, i) => (
             <li key={dish.id}>
-              {dish.type} <button onClick={pickUp(dish, i)}>pick up</button>
+              <DishDrawing dish={dish} />{' '}
+              <button onClick={pickUp(dish, i)}>pick up</button>
             </li>
           ))}
         </ul>
       </section>
       <section>
         <h2>Hand</h2>
-        {hand && hand.type}{' '}
+        {hand && <DishDrawing dish={hand}/>}{' '}
         {hand && <button onClick={moveToSink(hand)}>wash</button>}
       </section>
       <section>
         <h2>Sink</h2>
-        {sink && sink.type}{' '}
+        {sink && <DishDrawing dish={sink}/>}{' '}
         {canDry && <button onClick={moveToDry(sink)}>dry</button>}
       </section>
       <section>
@@ -150,7 +185,7 @@ export default function App() {
         <ul>
           {drying.map((dish, i) => (
             <li key={dish.id}>
-              {dish.type} <button onClick={putAway(i)}>put away</button>
+              <DishDrawing dish={dish}/> <button onClick={putAway(i)}>put away</button>
             </li>
           ))}
         </ul>
