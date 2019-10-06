@@ -102,6 +102,7 @@ export default function App() {
   return (
     <>
       <h1>Dish washing simulator</h1>
+      <a href="https://github.com/bullgit/dirty-dishes">source</a>
       {error && <p>{error}</p>}
       <section>
         <h2>Pile</h2>
