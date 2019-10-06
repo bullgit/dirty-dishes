@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const DISH_TYPES: Dish[] = [
+const DISH_TYPES: DishName[] = [
   'plate',
   'bowl',
   'knife',
@@ -11,7 +11,7 @@ const DISH_TYPES: Dish[] = [
   'glass',
   'wine glass',
 ];
-type Dish =
+type DishName =
   | 'plate'
   | 'bowl'
   | 'knife'
@@ -22,10 +22,16 @@ type Dish =
   | 'glass'
   | 'wine glass';
 
-function getRandomDish() {
-  return DISH_TYPES[Math.floor(Math.random() * DISH_TYPES.length)];
+type Dish = { type: DishName; id: string };
+
+function createDish(): Dish {
+  return {
+    type: DISH_TYPES[Math.floor(Math.random() * DISH_TYPES.length)],
+    id: crypto.getRandomValues(new Uint32Array(10)).toString(),
+  };
 }
 
+// from overreacted.io
 function useInterval(callback: Function, delay: number) {
   const savedCallback = useRef<Function>();
 
@@ -44,25 +50,39 @@ function useInterval(callback: Function, delay: number) {
   }, [delay]);
 }
 
+const WASH_TIME = 5000;
+
 export default function App() {
   const [error, setError] = useState<string | undefined>();
-  const [dishes, setDishes] = useState<Dish[]>(['plate', 'bowl']);
+  const [dishes, setDishes] = useState<Dish[]>([createDish()]);
   const [hand, setHand] = useState<Dish | undefined>();
   const [sink, setSink] = useState<Dish | undefined>();
   const [canDry, setCanDry] = useState<boolean>(false);
-  const [drying, setDrying] = useState<Dish[]>(['plate', 'bowl']);
+  const [drying, setDrying] = useState<Dish[]>([]);
+  const [cupboard, setCupboard] = useState<number>(0);
+
+  // TODO: better formula, it converges too slowly now
+  const speed = 5000 + 5000 / (Math.log(cupboard + 1) + 1);
 
   useInterval(() => {
-    setDishes([...dishes, getRandomDish()]);
-  }, 5000);
+    setDishes([...dishes, createDish()]);
+  }, speed);
 
   useEffect(() => {
     if (sink) {
       setTimeout(() => {
-        setCanDry(true)
-      }, 5000)
+        setCanDry(true);
+      }, WASH_TIME);
     }
-  }, [sink])
+  }, [sink]);
+
+  useEffect(() => {
+    if (error) {
+      setTimeout(() => {
+        setError(undefined);
+      }, 5000);
+    }
+  }, [error]);
 
   const pickUp = (dish: Dish, i: number) => () => {
     const newDishes = [...dishes.slice(0, i), ...dishes.slice(i + 1)];
@@ -76,10 +96,6 @@ export default function App() {
     }
   };
 
-  const putAway = (i: number) => () => {
-    setDrying([...drying.slice(0, i), ...drying.slice(i + 1)]);
-  };
-
   const moveToSink = (dish: Dish) => () => {
     if (!sink) {
       setHand(undefined);
@@ -90,13 +106,18 @@ export default function App() {
   };
 
   const moveToDry = (dish: Dish | undefined) => () => {
-    if (dish) {
+    if (dish && drying.length < 10) {
       setSink(undefined);
       setCanDry(false);
       setDrying([...drying, dish]);
     } else {
-      setError('wash the things in the sink first!');
+      setError('put away the dry dishes first!');
     }
+  };
+
+  const putAway = (i: number) => () => {
+    setDrying([...drying.slice(0, i), ...drying.slice(i + 1)]);
+    setCupboard(cupboard + 1);
   };
 
   return (
@@ -108,29 +129,35 @@ export default function App() {
         <h2>Pile</h2>
         <ul>
           {dishes.map((dish, i) => (
-            <li>
-              {dish} <button onClick={pickUp(dish, i)}>pick up</button>
+            <li key={dish.id}>
+              {dish.type} <button onClick={pickUp(dish, i)}>pick up</button>
             </li>
           ))}
         </ul>
       </section>
       <section>
         <h2>Hand</h2>
-        {hand} {hand && <button onClick={moveToSink(hand)}>wash</button>}
+        {hand && hand.type}{' '}
+        {hand && <button onClick={moveToSink(hand)}>wash</button>}
       </section>
       <section>
         <h2>Sink</h2>
-        {sink} {canDry && <button onClick={moveToDry(sink)}>dry</button>}
+        {sink && sink.type}{' '}
+        {canDry && <button onClick={moveToDry(sink)}>dry</button>}
       </section>
       <section>
         <h2>Drying rack</h2>
         <ul>
           {drying.map((dish, i) => (
-            <li>
-              {dish} <button onClick={putAway(i)}>put away</button>
+            <li key={dish.id}>
+              {dish.type} <button onClick={putAway(i)}>put away</button>
             </li>
           ))}
         </ul>
+      </section>
+      <section>
+        <h2>Cupboard</h2>
+        <p>Put {cupboard} items away.</p>
       </section>
     </>
   );
