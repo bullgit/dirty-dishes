@@ -1,33 +1,33 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 
 const DISH_TYPES: DishName[] = [
-  'plate',
-  'bowl',
-  'knife',
-  'spoon',
-  'fork',
-  'pot',
-  'pan',
-  'glass',
-  'wine glass',
+  "plate",
+  "bowl",
+  "knife",
+  "spoon",
+  "fork",
+  "pot",
+  "pan",
+  "glass",
+  "wine glass"
 ];
 type DishName =
-  | 'plate'
-  | 'bowl'
-  | 'knife'
-  | 'spoon'
-  | 'fork'
-  | 'pot'
-  | 'pan'
-  | 'glass'
-  | 'wine glass';
+  | "plate"
+  | "bowl"
+  | "knife"
+  | "spoon"
+  | "fork"
+  | "pot"
+  | "pan"
+  | "glass"
+  | "wine glass";
 
 type Dish = { type: DishName; id: string };
 
 function createDish(): Dish {
   return {
     type: DISH_TYPES[Math.floor(Math.random() * DISH_TYPES.length)],
-    id: crypto.getRandomValues(new Uint32Array(10)).toString(),
+    id: crypto.getRandomValues(new Uint32Array(10)).toString()
   };
 }
 
@@ -101,7 +101,7 @@ export default function App() {
       setHand(undefined);
       setSink(dish);
     } else {
-      setError('wash the things in the sink first!');
+      setError("wash the things in the sink first!");
     }
   };
 
@@ -111,7 +111,7 @@ export default function App() {
       setCanDry(false);
       setDrying([...drying, dish]);
     } else {
-      setError('put away the dry dishes first!');
+      setError("put away the dry dishes first!");
     }
   };
 
@@ -125,40 +125,42 @@ export default function App() {
       <h1>Dish washing simulator</h1>
       <a href="https://github.com/bullgit/dirty-dishes">source</a>
       {error && <p>{error}</p>}
-      <section>
-        <h2>Pile</h2>
-        <ul>
-          {dishes.map((dish, i) => (
-            <li key={dish.id}>
-              {dish.type} <button onClick={pickUp(dish, i)}>pick up</button>
-            </li>
-          ))}
-        </ul>
-      </section>
-      <section>
-        <h2>Hand</h2>
-        {hand && hand.type}{' '}
-        {hand && <button onClick={moveToSink(hand)}>wash</button>}
-      </section>
-      <section>
-        <h2>Sink</h2>
-        {sink && sink.type}{' '}
-        {canDry && <button onClick={moveToDry(sink)}>dry</button>}
-      </section>
-      <section>
-        <h2>Drying rack</h2>
-        <ul>
-          {drying.map((dish, i) => (
-            <li key={dish.id}>
-              {dish.type} <button onClick={putAway(i)}>put away</button>
-            </li>
-          ))}
-        </ul>
-      </section>
-      <section>
-        <h2>Cupboard</h2>
-        <p>Put {cupboard} items away.</p>
-      </section>
+      <div className="flex">
+        <section>
+          <h2>Pile</h2>
+          <ul>
+            {dishes.map((dish, i) => (
+              <li key={dish.id}>
+                {dish.type} <button onClick={pickUp(dish, i)}>pick up</button>
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section>
+          <h2>Hand</h2>
+          {hand && hand.type}{" "}
+          {hand && <button onClick={moveToSink(hand)}>wash</button>}
+        </section>
+        <section>
+          <h2>Sink</h2>
+          {sink && sink.type}{" "}
+          {canDry && <button onClick={moveToDry(sink)}>dry</button>}
+        </section>
+        <section>
+          <h2>Drying rack</h2>
+          <ul>
+            {drying.map((dish, i) => (
+              <li key={dish.id}>
+                {dish.type} <button onClick={putAway(i)}>put away</button>
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section>
+          <h2>Cupboard</h2>
+          <p>Put {cupboard} items away.</p>
+        </section>
+      </div>
     </>
   );
 }
